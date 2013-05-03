@@ -254,7 +254,7 @@ void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t)
 void handle_init(AppContextRef ctx) {
   (void)ctx;
 	
-  window_init(&window, "KP SunClock V2");
+  window_init(&window, "KP Sun-Moon-Clock");
   window_stack_push(&window, true /* Animated */);
   window_set_background_color(&window, GColorWhite);
 
