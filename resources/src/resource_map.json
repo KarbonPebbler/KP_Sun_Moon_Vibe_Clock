@@ -1,0 +1,39 @@
+{
+    "media": [
+        {
+            "defName": "IMAGE_HOUR",
+            "type": "png-trans",
+            "file": "images/hour.png"
+        },
+        {
+            "defName": "IMAGE_MENU_ICON",
+            "type": "png",
+            "file": "images/menu_icon_sunclock.png"
+        },
+        {
+            "characterRegex": "[a-z01]",
+            "defName": "FONT_MOON_PHASES_SUBSET_30",
+            "type": "font",
+            "file": "fonts/moon_phases.ttf"
+        },
+        {
+            "characterRegex": "[:0-9]",
+            "defName": "FONT_ROBOTO_CONDENSED_18",
+            "type": "font",
+            "file": "fonts/Roboto-Condensed.ttf"
+        },
+        {
+            "characterRegex": "[:0-9]",
+            "defName": "FONT_ROBOTO_CONDENSED_30",
+            "type": "font",
+            "file": "fonts/Roboto-Condensed.ttf"
+        },
+        {
+            "defName": "IMAGE_WATCHFACE",
+            "type": "png-trans",
+            "file": "images/watchface.png"
+        }
+    ],
+    "friendlyVersion": "VERSION",
+    "versionDefName": "APP_RESOURCES"
+}
