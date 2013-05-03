@@ -1,14 +1,22 @@
-KarbonPebbler: Sun Moon Vibe Clock
-==================================
+Pebble - Sun Moon Vibe Clock
+============================
 
 Pebble SunClock with added Moon, Day, Date &amp; optional Hourly Vibe function.
 
-- Configure your location (longitude/latitude) and time zone by editing src/config.h.
+- Before compiling, ensure to configure your location (longitude/latitude) and time zone by editing src/config.h.
+  - Use the following URL to find your location http://itouchmap.com/latlong.html
 - Configure Vibe function (default is false) editing src/sunclock.c 
   - #define HOUR_VIBRATION true
 
-Thanks to:
+Credit & Thanks:
 
 - Michael Ehrmann (Boldo) for the original SunClock source
 - Chad Harp for the Almanac source
 - Dersie for beta testing the revised code
+
+Feel free to reuse the code provided, but, please credit those that made this happen.
+
+Enjoy,
+
+KarbonPebbler
+=============
