@@ -4,7 +4,8 @@ KarbonPebbler: Sun Moon Vibe Clock
 Pebble SunClock with added Moon, Day, Date &amp; optional Hourly Vibe function.
 
 - Configure your location (longitude/latitude) and time zone by editing src/config.h.
-- Configure Vibe function (default is false) in src/sunclock.c #define HOUR_VIBRATION true
+- Configure Vibe function (default is false) editing src/sunclock.c 
+  - #define HOUR_VIBRATION true
 
 Thanks to:
 
