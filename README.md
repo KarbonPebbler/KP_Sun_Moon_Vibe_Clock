@@ -1,5 +1,5 @@
-kp_sun_moon_clock_vibe
-======================
+KarbonPebbler: Sun Moon Vibe Clock
+==================================
 
 Pebble SunClock with added Moon, Day, Date &amp; optional Hourly Vibe function.
 
