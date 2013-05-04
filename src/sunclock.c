@@ -13,8 +13,7 @@ PBL_APP_INFO(MY_UUID,
              APP_INFO_WATCH_FACE);
 
 #define HOUR_VIBRATION true
-#define HOUR_VIBRATION_START 0
-#define HOUR_VIBRATION_END 24
+
 Window window;
 
 #if HOUR_VIBRATION
