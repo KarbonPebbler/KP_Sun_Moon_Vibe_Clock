@@ -14,7 +14,7 @@ Credit & Thanks:
 - Chad Harp for the Almanac source
 - Dersie for beta testing the revised code
 
-Feel free to reuse the code provided, but, please credit those that made this happen.
+Feel free to reuse the code provided, but, please ensure you credit the authors. Thank you. :)
 
 Enjoy,
 
