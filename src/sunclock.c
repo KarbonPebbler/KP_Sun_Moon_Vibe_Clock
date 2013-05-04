@@ -12,7 +12,7 @@ PBL_APP_INFO(MY_UUID,
              RESOURCE_ID_IMAGE_MENU_ICON,
              APP_INFO_WATCH_FACE);
 
-#define HOUR_VIBRATION true
+
 
 Window window;
 
