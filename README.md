@@ -5,7 +5,7 @@ Watch Face: Pebble 24 Hour Sun Clock with added Moon, Day, Date & optional Hourl
 
 - Before compiling, ensure to configure your location (longitude/latitude) and time zone by editing src/config.h.
   - Use the following URL to find your location http://itouchmap.com/latlong.html
-- Configure Vibe function (default is false) editing src/sunclock.c 
+- Configure Vibe function (default is false) editing src/config.h. 
   - #define HOUR_VIBRATION true
 
 Credit & Thanks:
