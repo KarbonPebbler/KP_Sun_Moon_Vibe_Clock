@@ -265,6 +265,7 @@ void handle_init(AppContextRef ctx) {
 
   rotbmp_pair_init_container(RESOURCE_ID_IMAGE_WATCHFACE_WHITE, RESOURCE_ID_IMAGE_WATCHFACE_BLACK, &watchface_container);
   layer_add_child(&graphics_sun_layer, &watchface_container.layer.layer);
+  rotbmp_pair_layer_set_angle(&watchface_container.layer, 1);
   watchface_container.layer.layer.frame.origin.x = (144/2) - (watchface_container.layer.layer.frame.size.w/2);
   watchface_container.layer.layer.frame.origin.y = (168/2) - (watchface_container.layer.layer.frame.size.h/2);
 
