@@ -140,7 +140,7 @@ void handle_day(AppContextRef ctx, PebbleTickEvent *t) {
 
 
 
-void updateDayAndNightInfo()
+void updateDayAndNightInfo(bool update_everything)
 {
   static char sunrise_text[] = "00:00";
   static char sunset_text[] = "00:00";
@@ -148,7 +148,7 @@ void updateDayAndNightInfo()
   PblTm pblTime;
   get_time(&pblTime);
 
-  if(currentData != pblTime.tm_hour) 
+  if(update_everything || currentData != pblTime.tm_hour) 
   {
     char *time_format;
 
@@ -199,17 +199,17 @@ void updateDayAndNightInfo()
 void have_time(int32_t dst_offset, bool is_dst, uint32_t unixtime, const char* tz_name, void* context) {
   realTimezone = dst_offset/3600.0;
 
-  //Update screen to reflect correct TimeZone information
-  updateDayAndNightInfo();
+  //Now that we have timezone get location
+  http_location_request();	
 }
 
 //Called if Httpebble is installed on phone.
 void have_location(float latitude, float longitude, float altitude, float accuracy, void* context) {
-	realLatitude = latitude;
-	realLongitude = longitude;
+	realLatitude = latitude * 10000; //Fixing the float values
+	realLongitude = longitude * 10000; //Fixing the float values
   
   //Update screen to reflect correct Location information
-  updateDayAndNightInfo();
+  updateDayAndNightInfo(true);
 }
 
 void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t) 
@@ -268,9 +268,8 @@ void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t)
   #endif
 	
   http_time_request();
-  http_location_request();	
   
-  updateDayAndNightInfo();
+  updateDayAndNightInfo(false);
 }
 
 
@@ -376,13 +375,12 @@ PblTm t;
 
   http_register_callbacks((HTTPCallbacks){
     .time=have_time,
-    .location=have_location,
-  }, NULL);
+    .location=have_location
+  }, (void*)ctx);
 
   http_time_request();
-  http_location_request();	
 
-  updateDayAndNightInfo();
+  updateDayAndNightInfo(false);
 }
 
 void handle_deinit(AppContextRef ctx) {
