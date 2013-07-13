@@ -7,12 +7,21 @@
 #include "http.h"
 
 #define MY_UUID {0x91,0x41,0xB6,0x28,0xBC,0x89,0x49,0x8E,0xB1,0x47,0x44,0x17,0xE0,0x5C,0xDE,0xD9}
+
+if (ANDROID) {
 PBL_APP_INFO(MY_UUID,
              "KP Sun-Moon-Clock", "KarbonPebbler,Boldo,Chad Harp",
              2, 0, /* App version */
              RESOURCE_ID_IMAGE_MENU_ICON,
              APP_INFO_WATCH_FACE);
-
+}
+else {
+PBL_APP_INFO(HTTP_UUID,
+             "KP Sun-Moon-Clock", "KarbonPebbler,Boldo,Chad Harp",
+             2, 0, /* App version */
+             RESOURCE_ID_IMAGE_MENU_ICON,
+             APP_INFO_WATCH_FACE);
+}
 
 
 Window window;

@@ -4,3 +4,4 @@
 #define TIMEZONE 0.0;
 //NOTE: Change false to true if you want to enable the vibe function
 #define HOUR_VIBRATION false
+#define ANDROID true
