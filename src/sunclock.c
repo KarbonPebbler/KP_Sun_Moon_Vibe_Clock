@@ -197,16 +197,21 @@ void updateDayAndNightInfo(bool update_everything)
 
 //Called if Httpebble is installed on phone.
 void have_time(int32_t dst_offset, bool is_dst, uint32_t unixtime, const char* tz_name, void* context) {
-  realTimezone = dst_offset/3600.0;
-
+  if (!is_dst) {
+    realTimezone = dst_offset/3600.0;
+  }
+  else {
+    realTimezone = (dst_offset/3600.0) - 1;
+  }
+ 
   //Now that we have timezone get location
   http_location_request();	
 }
 
 //Called if Httpebble is installed on phone.
 void have_location(float latitude, float longitude, float altitude, float accuracy, void* context) {
-	realLatitude = latitude * 10000; //Fixing the float values
-	realLongitude = longitude * 10000; //Fixing the float values
+	realLatitude = latitude;
+	realLongitude = longitude;  
   
   //Update screen to reflect correct Location information
   updateDayAndNightInfo(true);
