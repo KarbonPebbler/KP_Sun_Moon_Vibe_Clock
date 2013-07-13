@@ -1,3 +1,0 @@
-[submodule "src/http"]
-	path = src/http
-	url = https://github.com/Katharine/httpebble-watch.git
