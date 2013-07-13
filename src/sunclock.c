@@ -36,6 +36,7 @@ Layer graphics_sun_layer;
 //Make fonts global so we can deinit later
 GFont font_roboto;
 GFont font_moon;
+float realTimezone = TIMEZONE;
 
 RotBmpPairContainer bitmap_container;
 RotBmpPairContainer watchface_container;
@@ -73,7 +74,7 @@ float get24HourAngle(int hours, int minutes)
 
 void adjustTimezone(float* time) 
 {
-  *time += TIMEZONE;
+  *time += realTimezone;
   if (*time > 24) *time -= 24;
   if (*time < 0) *time += 24;
 }
@@ -190,6 +191,14 @@ void updateDayAndNightInfo()
   
     currentData = pblTime.tm_hour;
   }
+}
+
+//Called if Httpebble is installed on phone.
+void have_time(int32_t dst_offset, bool is_dst, uint32_t unixtime, const char* tz_name, void* context) {
+  realTimezone = dst_offset/3600.0;
+
+  //Update screen to reflect correct TimeZone information
+  updateDayAndNightInfo();
 }
 
 void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t) 
@@ -349,6 +358,14 @@ PblTm t;
   text_layer_set_font(&text_sunset_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   layer_add_child(&window.layer, &text_sunset_layer.layer); 
 
+  http_set_app_id(55122370);
+
+  http_register_callbacks((HTTPCallbacks){
+    .time=have_time,
+  }, NULL);
+
+  http_time_request();
+	
   updateDayAndNightInfo();
 }
 
@@ -368,6 +385,12 @@ void pbl_main(void *params) {
     .tick_info = {
       .tick_handler = &handle_minute_tick,
       .tick_units = MINUTE_UNIT
+    },
+    .messaging_info = {
+      .buffer_sizes = {
+        .inbound = 124,
+        .outbound = 124,
+      }
     }
   };
   app_event_loop(params, &handlers);
