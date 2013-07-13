@@ -37,6 +37,8 @@ Layer graphics_sun_layer;
 GFont font_roboto;
 GFont font_moon;
 float realTimezone = TIMEZONE;
+float realLatitude = LATITUDE;
+float realLongitude = LONGITUDE;
 
 RotBmpPairContainer bitmap_container;
 RotBmpPairContainer watchface_container;
@@ -118,7 +120,7 @@ void handle_day(AppContextRef ctx, PebbleTickEvent *t) {
     // moon
     moonphase_number = moon_phase(tm2jd(time));
     // correct for southern hemisphere
-    if ((moonphase_number > 0) && (LATITUDE < 0))
+    if ((moonphase_number > 0) && (realLatitude < 0))
         moonphase_number = 28 - moonphase_number;
     // select correct font char
     if (moonphase_number == 14)
@@ -159,8 +161,8 @@ void updateDayAndNightInfo()
       time_format = "%I:%M";
     }
 
-    float sunriseTime = calcSunRise(pblTime.tm_year, pblTime.tm_mon+1, pblTime.tm_mday, LATITUDE, LONGITUDE, 91.0f);
-    float sunsetTime = calcSunSet(pblTime.tm_year, pblTime.tm_mon+1, pblTime.tm_mday, LATITUDE, LONGITUDE, 91.0f);
+    float sunriseTime = calcSunRise(pblTime.tm_year, pblTime.tm_mon+1, pblTime.tm_mday, realLatitude, realLongitude, 91.0f);
+    float sunsetTime = calcSunSet(pblTime.tm_year, pblTime.tm_mon+1, pblTime.tm_mday, realLatitude, realLongitude, 91.0f);
     adjustTimezone(&sunriseTime);
     adjustTimezone(&sunsetTime);
     
@@ -198,6 +200,15 @@ void have_time(int32_t dst_offset, bool is_dst, uint32_t unixtime, const char* t
   realTimezone = dst_offset/3600.0;
 
   //Update screen to reflect correct TimeZone information
+  updateDayAndNightInfo();
+}
+
+//Called if Httpebble is installed on phone.
+void have_location(float latitude, float longitude, float altitude, float accuracy, void* context) {
+	realLatitude = latitude;
+	realLongitude = longitude;
+  
+  //Update screen to reflect correct Location information
   updateDayAndNightInfo();
 }
 
@@ -256,6 +267,9 @@ void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t)
     }
   #endif
 	
+  http_time_request();
+  http_location_request();	
+  
   updateDayAndNightInfo();
 }
 
@@ -362,10 +376,12 @@ PblTm t;
 
   http_register_callbacks((HTTPCallbacks){
     .time=have_time,
+    .location=have_location,
   }, NULL);
 
   http_time_request();
-	
+  http_location_request();	
+
   updateDayAndNightInfo();
 }
 
