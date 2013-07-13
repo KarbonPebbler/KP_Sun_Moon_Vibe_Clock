@@ -190,8 +190,13 @@ void updateDayAndNightInfo(bool update_everything)
     sunsetTime+=12.0f;
     sun_path_info.points[4].x = (int16_t)(my_sin(sunsetTime/24 * M_PI * 2) * 120);
     sun_path_info.points[4].y = -(int16_t)(my_cos(sunsetTime/24 * M_PI * 2) * 120);
-  
+
     currentData = pblTime.tm_hour;
+    
+    //Update location unless being called from location update
+    if (!update_everything) {
+      http_time_request();
+    }
   }
 }
 
@@ -271,8 +276,6 @@ void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t)
 	vibes_enqueue_custom_pattern(hour_pattern);
     }
   #endif
-	
-  http_time_request();
   
   updateDayAndNightInfo(false);
 }
