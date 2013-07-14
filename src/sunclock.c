@@ -4,14 +4,23 @@
 #include "config.h"
 #include "my_math.h"
 #include "suncalc.h"
+#include "http.h"
 
-#define MY_UUID {0xB9,0x51,0xEB,0x8C,0x14,0x58,0x4F,0x52,0x94,0x59,0x44,0x17,0xE0,0x5C,0xDE,0xD9}
+#define MY_UUID {0x91,0x41,0xB6,0x28,0xBC,0x89,0x49,0x8E,0xB1,0x47,0x44,0x17,0xE0,0x5C,0xDE,0xD9}
+
+#if ANDROID
 PBL_APP_INFO(MY_UUID,
              "KP Sun-Moon-Clock", "KarbonPebbler,Boldo,Chad Harp",
              2, 0, /* App version */
              RESOURCE_ID_IMAGE_MENU_ICON,
              APP_INFO_WATCH_FACE);
-
+# else
+PBL_APP_INFO(HTTP_UUID,
+             "KP Sun-Moon-Clock", "KarbonPebbler,Boldo,Chad Harp",
+             2, 0, /* App version */
+             RESOURCE_ID_IMAGE_MENU_ICON,
+             APP_INFO_WATCH_FACE);
+#endif
 
 
 Window window;
@@ -35,6 +44,9 @@ Layer graphics_sun_layer;
 //Make fonts global so we can deinit later
 GFont font_roboto;
 GFont font_moon;
+float realTimezone = TIMEZONE;
+float realLatitude = LATITUDE;
+float realLongitude = LONGITUDE;
 
 RotBmpPairContainer bitmap_container;
 RotBmpPairContainer watchface_container;
@@ -72,7 +84,7 @@ float get24HourAngle(int hours, int minutes)
 
 void adjustTimezone(float* time) 
 {
-  *time += TIMEZONE;
+  *time += realTimezone;
   if (*time > 24) *time -= 24;
   if (*time < 0) *time += 24;
 }
@@ -116,7 +128,7 @@ void handle_day(AppContextRef ctx, PebbleTickEvent *t) {
     // moon
     moonphase_number = moon_phase(tm2jd(time));
     // correct for southern hemisphere
-    if ((moonphase_number > 0) && (LATITUDE < 0))
+    if ((moonphase_number > 0) && (realLatitude < 0))
         moonphase_number = 28 - moonphase_number;
     // select correct font char
     if (moonphase_number == 14)
@@ -136,7 +148,7 @@ void handle_day(AppContextRef ctx, PebbleTickEvent *t) {
 
 
 
-void updateDayAndNightInfo()
+void updateDayAndNightInfo(bool update_everything)
 {
   static char sunrise_text[] = "00:00";
   static char sunset_text[] = "00:00";
@@ -144,7 +156,7 @@ void updateDayAndNightInfo()
   PblTm pblTime;
   get_time(&pblTime);
 
-  if(currentData != pblTime.tm_hour) 
+  if(update_everything || currentData != pblTime.tm_hour) 
   {
     char *time_format;
 
@@ -157,8 +169,8 @@ void updateDayAndNightInfo()
       time_format = "%I:%M";
     }
 
-    float sunriseTime = calcSunRise(pblTime.tm_year, pblTime.tm_mon+1, pblTime.tm_mday, LATITUDE, LONGITUDE, 91.0f);
-    float sunsetTime = calcSunSet(pblTime.tm_year, pblTime.tm_mon+1, pblTime.tm_mday, LATITUDE, LONGITUDE, 91.0f);
+    float sunriseTime = calcSunRise(pblTime.tm_year, pblTime.tm_mon+1, pblTime.tm_mday, realLatitude, realLongitude, 91.0f);
+    float sunsetTime = calcSunSet(pblTime.tm_year, pblTime.tm_mon+1, pblTime.tm_mday, realLatitude, realLongitude, 91.0f);
     adjustTimezone(&sunriseTime);
     adjustTimezone(&sunsetTime);
     
@@ -186,9 +198,36 @@ void updateDayAndNightInfo()
     sunsetTime+=12.0f;
     sun_path_info.points[4].x = (int16_t)(my_sin(sunsetTime/24 * M_PI * 2) * 120);
     sun_path_info.points[4].y = -(int16_t)(my_cos(sunsetTime/24 * M_PI * 2) * 120);
-  
+
     currentData = pblTime.tm_hour;
+    
+    //Update location unless being called from location update
+    if (!update_everything) {
+      http_time_request();
+    }
   }
+}
+
+//Called if Httpebble is installed on phone.
+void have_time(int32_t dst_offset, bool is_dst, uint32_t unixtime, const char* tz_name, void* context) {
+  if (!is_dst) {
+    realTimezone = dst_offset/3600.0;
+  }
+  else {
+    realTimezone = (dst_offset/3600.0) - 1;
+  }
+ 
+  //Now that we have timezone get location
+  http_location_request();	
+}
+
+//Called if Httpebble is installed on phone.
+void have_location(float latitude, float longitude, float altitude, float accuracy, void* context) {
+	realLatitude = latitude;
+	realLongitude = longitude;  
+  
+  //Update screen to reflect correct Location information
+  updateDayAndNightInfo(true);
 }
 
 void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t) 
@@ -245,8 +284,8 @@ void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t)
 	vibes_enqueue_custom_pattern(hour_pattern);
     }
   #endif
-	
-  updateDayAndNightInfo();
+  
+  updateDayAndNightInfo(false);
 }
 
 
@@ -265,6 +304,7 @@ void handle_init(AppContextRef ctx) {
 
   rotbmp_pair_init_container(RESOURCE_ID_IMAGE_WATCHFACE_WHITE, RESOURCE_ID_IMAGE_WATCHFACE_BLACK, &watchface_container);
   layer_add_child(&graphics_sun_layer, &watchface_container.layer.layer);
+  rotbmp_pair_layer_set_angle(&watchface_container.layer, 1);
   watchface_container.layer.layer.frame.origin.x = (144/2) - (watchface_container.layer.layer.frame.size.w/2);
   watchface_container.layer.layer.frame.origin.y = (168/2) - (watchface_container.layer.layer.frame.size.h/2);
 
@@ -347,7 +387,16 @@ PblTm t;
   text_layer_set_font(&text_sunset_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   layer_add_child(&window.layer, &text_sunset_layer.layer); 
 
-  updateDayAndNightInfo();
+  http_set_app_id(55122370);
+
+  http_register_callbacks((HTTPCallbacks){
+    .time=have_time,
+    .location=have_location
+  }, (void*)ctx);
+
+  http_time_request();
+
+  updateDayAndNightInfo(false);
 }
 
 void handle_deinit(AppContextRef ctx) {
@@ -366,6 +415,12 @@ void pbl_main(void *params) {
     .tick_info = {
       .tick_handler = &handle_minute_tick,
       .tick_units = MINUTE_UNIT
+    },
+    .messaging_info = {
+      .buffer_sizes = {
+        .inbound = 124,
+        .outbound = 124,
+      }
     }
   };
   app_event_loop(params, &handlers);
